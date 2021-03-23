@@ -43,7 +43,7 @@ static Sprite particle_beam_sprite(particle_beam_img, 3);
 const static vec2 tank_size(14, 18);
 const static vec2 rocket_size(25, 24);
 
-const static float tank_radius = 8.5f; // was 8.5
+const static float tank_radius = 12.f; // was 8.5
 const static float rocket_radius = 10.f; 
 
 // -----------------------------------------------------------
