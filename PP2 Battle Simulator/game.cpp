@@ -17,7 +17,7 @@
 #define MAX_FRAMES 2000
 
 //Global performance timer
-#define REF_PERFORMANCE 50058 //UPDATE THIS WITH YOUR REFERENCE PERFORMANCE (see console after 2k frames) Myrdin: 50058 Wytze: 77237
+#define REF_PERFORMANCE 77237 //UPDATE THIS WITH YOUR REFERENCE PERFORMANCE (see console after 2k frames) Myrdin: 50058 Wytze: 77237
 static timer perf_timer;
 static float duration;
 
@@ -69,17 +69,17 @@ void Game::init()
     //Spawn blue tanks
     for (int i = 0; i < NUM_TANKS_BLUE; i++)
     {
-        tanks.push_back(Tank(start_blue_x + ((i % max_rows) * spacing), start_blue_y + ((i / max_rows) * spacing), BLUE, &tank_blue, &smoke, 1200, 600, tank_radius, TANK_MAX_HEALTH, TANK_MAX_SPEED));
+        tanks.emplace_back(Tank(start_blue_x + ((i % max_rows) * spacing), start_blue_y + ((i / max_rows) * spacing), BLUE, &tank_blue, &smoke, 1200, 600, tank_radius, TANK_MAX_HEALTH, TANK_MAX_SPEED));
     }
     //Spawn red tanks
     for (int i = 0; i < NUM_TANKS_RED; i++)
     {
-        tanks.push_back(Tank(start_red_x + ((i % max_rows) * spacing), start_red_y + ((i / max_rows) * spacing), RED, &tank_red, &smoke, 80, 80, tank_radius, TANK_MAX_HEALTH, TANK_MAX_SPEED));
+        tanks.emplace_back(Tank(start_red_x + ((i % max_rows) * spacing), start_red_y + ((i / max_rows) * spacing), RED, &tank_red, &smoke, 80, 80, tank_radius, TANK_MAX_HEALTH, TANK_MAX_SPEED));
     }
 
-    particle_beams.push_back(Particle_beam(vec2(SCRWIDTH / 2, SCRHEIGHT / 2), vec2(100, 50), &particle_beam_sprite, PARTICLE_BEAM_HIT_VALUE));
-    particle_beams.push_back(Particle_beam(vec2(80, 80), vec2(100, 50), &particle_beam_sprite, PARTICLE_BEAM_HIT_VALUE));
-    particle_beams.push_back(Particle_beam(vec2(1200, 600), vec2(100, 50), &particle_beam_sprite, PARTICLE_BEAM_HIT_VALUE));
+    particle_beams.emplace_back(Particle_beam(vec2(SCRWIDTH / 2, SCRHEIGHT / 2), vec2(100, 50), &particle_beam_sprite, PARTICLE_BEAM_HIT_VALUE));
+    particle_beams.emplace_back(Particle_beam(vec2(80, 80), vec2(100, 50), &particle_beam_sprite, PARTICLE_BEAM_HIT_VALUE));
+    particle_beams.emplace_back(Particle_beam(vec2(1200, 600), vec2(100, 50), &particle_beam_sprite, PARTICLE_BEAM_HIT_VALUE));
 }
 
 // -----------------------------------------------------------
@@ -152,7 +152,7 @@ void Game::update(float deltaTime)
             {
                 Tank& target = find_closest_enemy(tank);
 
-                rockets.push_back(Rocket(tank.position, (target.get_position() - tank.position).normalized() * 3, rocket_radius, tank.allignment, ((tank.allignment == RED) ? &rocket_red : &rocket_blue)));
+                rockets.emplace_back(Rocket(tank.position, (target.get_position() - tank.position).normalized() * 3, rocket_radius, tank.allignment, ((tank.allignment == RED) ? &rocket_red : &rocket_blue)));
 
                 tank.reload_rocket();
             }
@@ -175,11 +175,11 @@ void Game::update(float deltaTime)
         {
             if (tank.active && (tank.allignment != rocket.allignment) && rocket.intersects(tank.position, tank.collision_radius))
             {
-                explosions.push_back(Explosion(&explosion, tank.position));
+                explosions.emplace_back(Explosion(&explosion, tank.position));
 
                 if (tank.hit(ROCKET_HIT_VALUE))
                 {
-                    smokes.push_back(Smoke(smoke, tank.position - vec2(0, 48)));
+                    smokes.emplace_back(Smoke(smoke, tank.position - vec2(0, 48)));
                 }
 
                 rocket.active = false;
@@ -203,7 +203,7 @@ void Game::update(float deltaTime)
             {
                 if (tank.hit(particle_beam.damage))
                 {
-                    smokes.push_back(Smoke(smoke, tank.position - vec2(0, 48)));
+                    smokes.emplace_back(Smoke(smoke, tank.position - vec2(0, 48)));
                 }
             }
         }
