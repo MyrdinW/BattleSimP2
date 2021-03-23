@@ -17,7 +17,7 @@
 #define MAX_FRAMES 2000
 
 //Global performance timer
-#define REF_PERFORMANCE 50058 //UPDATE THIS WITH YOUR REFERENCE PERFORMANCE (see console after 2k frames) Myrdin: 50058
+#define REF_PERFORMANCE 50058 //UPDATE THIS WITH YOUR REFERENCE PERFORMANCE (see console after 2k frames) Myrdin: 50058 Wytze: 77237
 static timer perf_timer;
 static float duration;
 
