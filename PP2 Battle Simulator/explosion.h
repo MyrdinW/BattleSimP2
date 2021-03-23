@@ -1,4 +1,5 @@
 #pragma once
+#include "template.h"
 
 namespace Tmpl8
 {
