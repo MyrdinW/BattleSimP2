@@ -13,6 +13,8 @@
     <ClCompile Include="particle_beam.cpp" />
     <ClCompile Include="explosion.cpp" />
     <ClCompile Include="tank.cpp" />
+    <ClCompile Include="algorithms.cpp" />
+    <ClCompile Include="Grid.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game.h" />
@@ -29,6 +31,9 @@
     <ClInclude Include="explosion.h" />
     <ClInclude Include="tank.h" />
     <ClInclude Include="thread_pool.h" />
+    <ClInclude Include="algorithms.h" />
+    <ClInclude Include="defines.h" />
+    <ClInclude Include="Grid.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="template code">
@@ -39,5 +44,6 @@
     <Text Include="_readme.txt">
       <Filter>template code</Filter>
     </Text>
+    <Text Include="CMakeLists.txt" />
   </ItemGroup>
 </Project>

@@ -117,8 +117,10 @@
   </ItemDefinitionGroup>
   <!-- END Custom section -->
   <ItemGroup>
+    <ClCompile Include="algorithms.cpp" />
     <ClCompile Include="explosion.cpp" />
     <ClCompile Include="game.cpp" />
+    <ClCompile Include="Grid.cpp" />
     <ClCompile Include="particle_beam.cpp" />
     <ClCompile Include="rocket.cpp" />
     <ClCompile Include="smoke.cpp" />
@@ -129,8 +131,11 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="algorithms.h" />
+    <ClInclude Include="defines.h" />
     <ClInclude Include="explosion.h" />
     <ClInclude Include="game.h" />
+    <ClInclude Include="Grid.h" />
     <ClInclude Include="particle_beam.h" />
     <ClInclude Include="precomp.h" />
     <ClInclude Include="rocket.h" />
@@ -141,6 +146,7 @@
     <ClInclude Include="thread_pool.h" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="CMakeLists.txt" />
     <Text Include="_readme.txt" />
   </ItemGroup>
   <ItemGroup>
