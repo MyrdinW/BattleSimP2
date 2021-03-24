@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#define REF_PERFORMANCE 69931 //UPDATE THIS WITH YOUR REFERENCE PERFORMANCE (see console after 2k frames)
+#define REF_PERFORMANCE 73000 //UPDATE THIS WITH YOUR REFERENCE PERFORMANCE (see console after 2k frames) Myrdin: 50058 Wytze: 73000
 
 #define UINT16 uint16_t
 

@@ -2,7 +2,6 @@
 #include "defines.h"
 
 //Global performance timer
-#define REF_PERFORMANCE 73000 //UPDATE THIS WITH YOUR REFERENCE PERFORMANCE (see console after 2k frames) Myrdin: 50058 Wytze: 73000
 static timer perf_timer;
 static float duration;
 
