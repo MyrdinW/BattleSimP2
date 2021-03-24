@@ -143,6 +143,11 @@
   <ItemGroup>
     <Text Include="_readme.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="defines.h" />
+    <Content Include="Grid.cpp" />
+    <Content Include="Grid.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

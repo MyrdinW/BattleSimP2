@@ -12,6 +12,7 @@
 #endif
 
 #include "precomp.h"
+#include "defines.h"
 
 namespace Tmpl8
 {
