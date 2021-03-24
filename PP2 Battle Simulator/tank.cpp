@@ -1,5 +1,7 @@
 #include "precomp.h"
 #include "tank.h"
+#include "Grid.h"
+#include <iostream>
 
 
 namespace Tmpl8
@@ -17,6 +19,7 @@ Tank::Tank(
     float max_speed)
     : position(pos_x, pos_y),
       allignment(allignment),
+      gridCell(Grid::GetGridCell(position)),
       target(tar_x, tar_y),
       health(health),
       collision_radius(collision_radius),
@@ -32,9 +35,8 @@ Tank::Tank(
 {
 }
 
-Tank::~Tank()
-{
-}
+Tank::~Tank() = default;
+
 
 void Tank::tick()
 {
@@ -50,6 +52,14 @@ void Tank::tick()
         reloaded = true;
     }
 
+    auto newGridCell = Grid::GetGridCell(position);
+    if (gridCell != newGridCell)
+    {
+        //Move tank to the new grid cell
+        Grid::Instance()->MoveTankToGridCell(this, newGridCell);
+        //Update grid cell
+        gridCell = Grid::GetGridCell(position);
+    }
     force = vec2(0.f, 0.f);
 
     if (++current_frame > 8) current_frame = 0;

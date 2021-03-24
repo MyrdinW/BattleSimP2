@@ -1,3 +1,4 @@
+#include "precomp.h"
 #include "Grid.h"
 #include "defines.h"
 #include <iostream>
@@ -23,6 +24,11 @@ Grid* Grid::Instance()
     return instance;
 }
 
+#define CLAP_POS(_IN_) clamp((0.05f * _IN_) * (GRID_SIZE / 100.f), -(float)GRID_OFFSET, (float)GRID_SIZE - GRID_OFFSET) + GRID_OFFSET
+vec2 Grid::GetGridCell(const vec2& position)
+{
+    return vec2(CLAP_POS(position.x), CLAP_POS(position.y));
+}
 
 vector<vec2> Grid::GetNeighbouringCells()
 {
@@ -39,13 +45,13 @@ vector<vec2> Grid::GetNeighbouringCells()
     return cells;
 }
 
-void Grid::AddTankToGridCell(Tank * tank) { grid[tank->gridCell.x][tank->gridCell.y].emplace_back(tank); }
+void Grid::AddTankToGridCell(Tank * tank) { grid[(int)tank->gridCell.x][(int)tank->gridCell.y].emplace_back(tank); }
 
 void Grid::MoveTankToGridCell(Tmpl8::Tank * tank, const vec2&newPos)
 {
     //scoped_lock lock(mtx2);
-    auto& gridCell = grid[tank->gridCell.x][tank->gridCell.y];
-    grid[newPos.x][newPos.y].emplace_back(tank);
+    auto& gridCell = grid[(int)tank->gridCell.x][(int)tank->gridCell.y];
+    grid[(int)newPos.x][(int)newPos.y].emplace_back(tank);
     for (int i = 0; i < gridCell.size(); ++i)
     {
         if (gridCell[i] == tank)

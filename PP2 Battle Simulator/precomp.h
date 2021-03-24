@@ -77,7 +77,7 @@ using namespace std;
 using namespace Tmpl8;
 
 #include "thread_pool.h"
-
+#include "Grid.h"
 #include "tank.h"
 #include "rocket.h"
 #include "smoke.h"

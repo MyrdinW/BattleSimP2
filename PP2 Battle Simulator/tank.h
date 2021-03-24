@@ -34,6 +34,7 @@ class Tank
     void push(vec2 direction, float magnitude);
 
     vec2 position;
+    vec2 gridCell;
     vec2 speed;
     vec2 target;
 

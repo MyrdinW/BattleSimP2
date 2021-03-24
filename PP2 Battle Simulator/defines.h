@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#define REF_PERFORMANCE 73000 //UPDATE THIS WITH YOUR REFERENCE PERFORMANCE (see console after 2k frames) Myrdin: 50058 Wytze: 73000
+#define REF_PERFORMANCE 50058 //UPDATE THIS WITH YOUR REFERENCE PERFORMANCE (see console after 2k frames) Myrdin: 50058 Wytze: 73000
 
 #define UINT16 uint16_t
 
@@ -28,6 +28,6 @@
 
 #define MAX_TANKS NUM_TANKS_BLUE + NUM_TANKS_RED
 
-#define REDMASK (0x00FF0000)
-#define GREENMASK (0x0000FF00)
-#define BLUEMASK (0x000000FF)
+//#define REDMASK (0x00FF0000)
+//#define GREENMASK (0x0000FF00)
+//#define BLUEMASK (0x000000FF)

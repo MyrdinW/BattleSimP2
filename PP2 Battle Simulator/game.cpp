@@ -35,6 +35,8 @@ const static float rocket_radius = 10.f;
 // -----------------------------------------------------------
 void Game::init()
 {
+    auto instance = Grid::Instance();
+
     frame_count_font = new Font("assets/digital_small.png", "ABCDEFGHIJKLMNOPQRSTUVWXYZ:?!=-0123456789.");
 
     tanks.reserve(NUM_TANKS_BLUE + NUM_TANKS_RED);
@@ -64,6 +66,15 @@ void Game::init()
     particle_beams.emplace_back(Particle_beam(vec2(SCRWIDTH / 2, SCRHEIGHT / 2), vec2(100, 50), &particle_beam_sprite, PARTICLE_BEAM_HIT_VALUE));
     particle_beams.emplace_back(Particle_beam(vec2(80, 80), vec2(100, 50), &particle_beam_sprite, PARTICLE_BEAM_HIT_VALUE));
     particle_beams.emplace_back(Particle_beam(vec2(1200, 600), vec2(100, 50), &particle_beam_sprite, PARTICLE_BEAM_HIT_VALUE));
+
+    for (auto& tank : tanks)
+    {
+        instance->AddTankToGridCell(&tank);
+        if (tank.allignment == RED)
+            redTanks.emplace_back(&tank);
+        else
+            blueTanks.emplace_back(&tank);
+    }
 }
 
 // -----------------------------------------------------------
@@ -269,7 +280,9 @@ void Game::draw()
 void Tmpl8::Game::insertion_sort_tanks_health(const std::vector<Tank>& original, std::vector<const Tank*>& sorted_tanks, int begin, int end)
 {
     const int NUM_TANKS = end - begin;
-    sorted_tanks.reserve(NUM_TANKS);
+    tanks.reserve(NUM_TANKS_BLUE + NUM_TANKS_RED);
+    blueTanks.reserve(NUM_TANKS_BLUE);
+    redTanks.reserve(NUM_TANKS_RED);
     sorted_tanks.emplace_back(&original.at(begin));
 
     for (int i = begin + 1; i < (begin + NUM_TANKS); i++)

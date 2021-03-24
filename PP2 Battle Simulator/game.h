@@ -46,6 +46,8 @@ class Game
     Surface* screen;
 
     vector<Tank> tanks;
+    vector<Tank*> blueTanks;
+    vector<Tank*> redTanks;
     vector<Rocket> rockets;
     vector<Smoke> smokes;
     vector<Explosion> explosions;
