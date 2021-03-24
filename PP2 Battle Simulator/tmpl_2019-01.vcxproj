@@ -144,6 +144,8 @@
     <Text Include="_readme.txt" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="algorithms.cpp" />
+    <Content Include="algorithms.h" />
     <Content Include="defines.h" />
     <Content Include="Grid.cpp" />
     <Content Include="Grid.h" />
