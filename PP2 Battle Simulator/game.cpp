@@ -1,6 +1,7 @@
 #include "precomp.h" // include (only) this in every .cpp file
 #include "defines.h"
 
+
 //Global performance timer
 static timer perf_timer;
 static float duration;
@@ -27,8 +28,10 @@ static Sprite particle_beam_sprite(particle_beam_img, 3);
 const static vec2 tank_size(14, 18);
 const static vec2 rocket_size(25, 24);
 
-const static float tank_radius = 12.f; // was 8.5
+const static float tank_radius = 15.f; // was 8.5
 const static float rocket_radius = 10.f; 
+
+
 
 // -----------------------------------------------------------
 // Initialize the application
@@ -136,6 +139,8 @@ void Game::update(float deltaTime)
 
     updateTanks();
 
+  
+
 
 }
 
@@ -221,21 +226,10 @@ void Game::updateTanks()
                 //Shoot at closest target if reloaded
                 if (!tank.rocket_reloaded()) continue;
 
-                Tank* target = tank.allignment == RED ? blueteamKD->findClosestTank(&tank) : redteamKD->findClosestTank(&tank);
+                Tank* target = tank.allignment == RED ? blueteamKD->find_closest_enemy(&tank) : redteamKD->find_closest_enemy(&tank);
 
-                rockets.emplace_back(tank.position,
-                    (target->position - tank.position).normalized() * 3,
-                    rocket_radius,
-                    tank.allignment,
-                    ((tank.allignment == RED) ? &rocket_red : &rocket_blue));
-
-                    //Tank& target = find_closest_enemy(tank);
-
-                    //rockets.emplace_back(Rocket(tank.position, (target.get_position() - tank.position).normalized() * 3, rocket_radius, tank.allignment, ((tank.allignment == RED) ? &rocket_red : &rocket_blue)));
-
-                    tank.reload_rocket();
-                
-            
+                rockets.emplace_back(tank.position, (target->position - tank.position).normalized() * 3, rocket_radius, tank.allignment, ((tank.allignment == RED) ? &rocket_red : &rocket_blue));
+                tank.reload_rocket();   
     }
     
 }
@@ -330,6 +324,8 @@ void Game::draw()
         explosion.draw(screen);
     }
 
+
+
     //Draw sorted health bars
     for (int t = 0; t < 2; t++)
     {
@@ -351,6 +347,7 @@ void Game::draw()
         }
     }
 }
+
 
 // -----------------------------------------------------------
 // Sort tanks by health value using insertion sort
@@ -385,6 +382,8 @@ void Tmpl8::Game::insertion_sort_tanks_health(const std::vector<Tank>& original,
         }
     }
 }
+
+
 
 // -----------------------------------------------------------
 // When we reach MAX_FRAMES print the duration and speedup multiplier

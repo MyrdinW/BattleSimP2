@@ -109,7 +109,7 @@ namespace Tmpl8
          * @param tank The tank to measure the distance
          * @return
          */
-        Tank* findClosestTank(Tank* tank);
+        Tank* find_closest_enemy(Tank* tank);
 
         void printTree()
         {

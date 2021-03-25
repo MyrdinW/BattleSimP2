@@ -2,13 +2,25 @@
 #include <cmath>
 #include "precomp.h"
 
-
-
 using namespace std;
 
 namespace Tmpl8
 {
+    vector<int> CountSort(const vector<Tank*>& in)
+    {
+        vector<int> counters(TANK_MAX_HEALTH + 1, 0);
+        vector<int> result;
 
+        for (auto x : in)
+            counters.at(x->health <= 0 ? 0 : x->health)++;
+
+        for (int i = 0; i < TANK_MAX_HEALTH + 1; ++i)
+            if (counters[i] != 0)
+                for (int y = 0; y < counters[i]; ++y)
+                    result.push_back(i);
+
+        return result;
+    }
 
     template <class T>
     void LinkedList<T>::InsertValue(T value)
@@ -83,7 +95,7 @@ namespace Tmpl8
     }
 
     // Searches the closest enemy tank in the K D tree.
-    Tank* KDTree::findClosestTank(Tank* tank)
+    Tank* KDTree::find_closest_enemy(Tank* tank)
     {
         // some tanks go outside the screen, that is why we add some margin.
         float errorMargin = 250.f;
