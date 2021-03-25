@@ -215,14 +215,22 @@ void Game::updateTanks()
                 tank.tick();
 
                 //Shoot at closest target if reloaded
-                if (tank.rocket_reloaded())
-                {
-                    Tank& target = find_closest_enemy(tank);
+                if (!tank.rocket_reloaded()) continue;
 
-                    rockets.emplace_back(Rocket(tank.position, (target.get_position() - tank.position).normalized() * 3, rocket_radius, tank.allignment, ((tank.allignment == RED) ? &rocket_red : &rocket_blue)));
+                Tank* target = tank.allignment == RED ? blueteamKD->findClosestTank(&tank) : redteamKD->findClosestTank(&tank);
+
+                rockets.emplace_back(tank.position,
+                    (target->position - tank.position).normalized() * 3,
+                    rocket_radius,
+                    tank.allignment,
+                    ((tank.allignment == RED) ? &rocket_red : &rocket_blue));
+
+                    //Tank& target = find_closest_enemy(tank);
+
+                    //rockets.emplace_back(Rocket(tank.position, (target.get_position() - tank.position).normalized() * 3, rocket_radius, tank.allignment, ((tank.allignment == RED) ? &rocket_red : &rocket_blue)));
 
                     tank.reload_rocket();
-                }
+                
             
     }
     
