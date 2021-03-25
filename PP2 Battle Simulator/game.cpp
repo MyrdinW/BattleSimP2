@@ -117,6 +117,7 @@ Tank& Game::find_closest_enemy(Tank& current_tank)
 // -----------------------------------------------------------
 void Game::update(float deltaTime)
 {
+    initKD();
     updateSmoke();
     
     updateParticlebeams();
@@ -131,6 +132,13 @@ void Game::update(float deltaTime)
 
     updateTanks();
 
+
+}
+
+void Game::initKD()
+{
+    redteamKD = new KDTree(redTanks);
+    blueteamKD = new KDTree(blueTanks);
 
 }
 void Game::updateParticlebeams()

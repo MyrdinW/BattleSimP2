@@ -1,5 +1,7 @@
 #pragma once
 
+#include "algorithms.h"
+
 namespace Tmpl8
 {
 //forward declarations
@@ -16,6 +18,7 @@ class Game
     void shutdown();
     void update(float deltaTime);
     void draw();
+    void initKD();
     void tick(float deltaTime);
     void insertion_sort_tanks_health(const std::vector<Tank>& original, std::vector<const Tank*>& sorted_tanks, int begin, int end);
     void measure_performance();
@@ -52,6 +55,9 @@ class Game
     vector<Smoke> smokes;
     vector<Explosion> explosions;
     vector<Particle_beam> particle_beams;
+
+    KDTree* redteamKD;
+    KDTree* blueteamKD;
 
     Font* frame_count_font;
     long long frame_count = 0;
