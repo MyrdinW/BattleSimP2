@@ -117,77 +117,24 @@ Tank& Game::find_closest_enemy(Tank& current_tank)
 // -----------------------------------------------------------
 void Game::update(float deltaTime)
 {
-    UpdateTanks();
+    updateSmoke();
+    
+    updateParticlebeams();
 
-    //Update tanks
-    //for (Tank& tank : tanks)
-    //{
-    //    if (tank.active)
-    //    {
-    //        //Check tank collision and nudge tanks away from each other
-    //        for (Tank& o_tank : tanks)
-    //        {
-    //            if (&tank == &o_tank) continue;
-    //            
-    //            vec2 dir = tank.get_position() - o_tank.get_position();
-    //            float dir_squared_len = dir.sqr_length();
+    updateExplosions();
+    //Remove explosions with remove erase idiom
+    explosions.erase(std::remove_if(explosions.begin(), explosions.end(), [](const Explosion& explosion) { return explosion.done(); }), explosions.end());
 
-    //            float col_squared_len = (tank.get_collision_radius() + o_tank.get_collision_radius());
-    //            col_squared_len *= col_squared_len;
-
-    //            if (dir_squared_len < col_squared_len)
-    //            {
-    //                tank.push(dir.normalized(), 1.f);
-    //            }
-    //        }
-
-    //        //Move tanks according to speed and nudges (see above) also reload
-    //        tank.tick();
-
-    //        //Shoot at closest target if reloaded
-    //        if (tank.rocket_reloaded())
-    //        {
-    //            Tank& target = find_closest_enemy(tank);
-
-    //            rockets.emplace_back(Rocket(tank.position, (target.get_position() - tank.position).normalized() * 3, rocket_radius, tank.allignment, ((tank.allignment == RED) ? &rocket_red : &rocket_blue)));
-
-    //            tank.reload_rocket();
-    //        }
-    //    }
-    //}
-
-    //Update smoke plumes
-    for (Smoke& smoke : smokes)
-    {
-        smoke.tick();
-    }
-
-    //Update rockets
-    for (Rocket& rocket : rockets)
-    {
-        rocket.tick();
-
-        //Check if rocket collides with enemy tank, spawn explosion and if tank is destroyed spawn a smoke plume
-        for (Tank& tank : tanks)
-        {
-            if (tank.active && (tank.allignment != rocket.allignment) && rocket.intersects(tank.position, tank.collision_radius))
-            {
-                explosions.emplace_back(Explosion(&explosion, tank.position));
-
-                if (tank.hit(ROCKET_HIT_VALUE))
-                {
-                    smokes.emplace_back(Smoke(smoke, tank.position - vec2(0, 48)));
-                }
-
-                rocket.active = false;
-                break;
-            }
-        }
-    }
-
+    updateRockets();
     //Remove exploded rockets with remove erase idiom
     rockets.erase(std::remove_if(rockets.begin(), rockets.end(), [](const Rocket& rocket) { return !rocket.active; }), rockets.end());
 
+    updateTanks();
+
+
+}
+void Game::updateParticlebeams()
+{
     //Update particle beams
     for (Particle_beam& particle_beam : particle_beams)
     {
@@ -205,70 +152,125 @@ void Game::update(float deltaTime)
             }
         }
     }
+}
+void Game::updateSmoke() 
+{
+    //Update smoke plumes
+    for (Smoke& smoke : smokes)
+    {
+        smoke.tick();
+    }
+}
 
+void Game::updateTanks()
+{
+
+    for (int i = 0; i < tanks.size(); i++)
+    {
+            Tank& tank = tanks[i];
+            if (!tank.active) continue;
+
+                for (const auto& cell : Grid::GetNeighbouringCells())
+                {
+                    int x = tank.gridCell.x + cell.x;
+                    int y = tank.gridCell.y + cell.y;
+                    if (x < 0 || y < 0 || x > GRID_SIZE || y > GRID_SIZE) continue;
+
+                    for (auto& oTank : Grid::Instance()->grid[x][y])
+                    {
+                        if (&tank == oTank) continue;
+
+                        vec2 dir = tank.get_position() - oTank->get_position();
+
+                        float colSquaredLen =
+                            (tank.get_collision_radius() * tank.get_collision_radius()) +
+                            (oTank->get_collision_radius() * oTank->get_collision_radius());
+
+                        if (dir.sqr_length() < colSquaredLen) tank.push(dir.normalized(), 1.f);
+                    }
+                }
+
+                //Check if inside particle beam
+                for (Particle_beam& particle_beam : particle_beams)
+                {
+                    if (particle_beam.rectangle.intersects_circle(tank.get_position(),
+                        tank.get_collision_radius()))
+                    {
+                        if (tank.hit(particle_beam.damage))
+                        {
+                            smokes.emplace_back(smoke, tank.position - vec2(0, 48));
+                        }
+                    }
+                }
+
+                //Move tanks according to speed and nudges (see above) also reload
+                tank.tick();
+
+                //Shoot at closest target if reloaded
+                if (tank.rocket_reloaded())
+                {
+                    Tank& target = find_closest_enemy(tank);
+
+                    rockets.emplace_back(Rocket(tank.position, (target.get_position() - tank.position).normalized() * 3, rocket_radius, tank.allignment, ((tank.allignment == RED) ? &rocket_red : &rocket_blue)));
+
+                    tank.reload_rocket();
+                }
+            
+    }
+    
+}
+void Game::updateRockets()
+{
+
+        for (int i = 0; i < rockets.size(); i++) {
+            Rocket& nRocket = rockets[i];
+            nRocket.tick();
+
+            if (nRocket.position.x < -250 || nRocket.position.y < -250 || nRocket.position.x > 1750 || nRocket.position.y > 1750)
+            {
+                nRocket.active = false;
+                continue;
+            }
+
+            for (const auto& cell : Grid::GetNeighbouringCells())
+            {
+                vec2 rocketGridCell = Grid::GetGridCell(nRocket.position);
+                int x = rocketGridCell.x + cell.x;
+                int y = rocketGridCell.y + cell.y;
+                if (x < 0 || y < 0 || x > GRID_SIZE || y > GRID_SIZE) continue;
+
+                for (auto& tank : Grid::Instance()->grid[x][y])
+                {
+                    if (tank->active && (tank->allignment != nRocket.allignment) &&
+                        nRocket.intersects(tank->position, tank->collision_radius))
+                    {
+                        explosions.emplace_back(&explosion, tank->position);
+
+                        if (tank->hit(ROCKET_HIT_VALUE))
+                        {
+                            smokes.emplace_back(smoke, tank->position - vec2(0, 48));
+                        }
+
+                        nRocket.active = false;
+                        break;
+                    }
+                }
+            }
+        }
+        
+
+
+}
+
+void Game::updateExplosions()
+{
     //Update explosion sprites and remove when done with remove erase idiom
     for (Explosion& explosion : explosions)
     {
         explosion.tick();
     }
-
-    explosions.erase(std::remove_if(explosions.begin(), explosions.end(), [](const Explosion& explosion) { return explosion.done(); }), explosions.end());
 }
 
-void Game::UpdateTanks()
-{
-    for (Tank& tank : tanks)
-    {
-        if (tank.active)
-        {
-            for (const auto& cell : Grid::GetNeighbouringCells())
-            {
-                int x = tank.gridCell.x + cell.x;
-                int y = tank.gridCell.y + cell.y;
-                if (x < 0 || y < 0 || x > GRID_SIZE || y > GRID_SIZE) continue;
-
-                for (auto& oTank : Grid::Instance()->grid[x][y])
-                {
-                    if (&tank == oTank) continue;
-
-                    vec2 dir = tank.get_position() - oTank->get_position();
-
-                    float colSquaredLen =
-                        (tank.get_collision_radius() * tank.get_collision_radius()) +
-                        (oTank->get_collision_radius() * oTank->get_collision_radius());
-
-                    if (dir.sqr_length() < colSquaredLen) tank.push(dir.normalized(), 1.f);
-                }
-            }
-
-            //Check if inside particle beam
-            for (Particle_beam& particle_beam : particle_beams)
-            {
-                if (particle_beam.rectangle.intersects_circle(tank.get_position(),
-                    tank.get_collision_radius()))
-                {
-                    if (tank.hit(particle_beam.damage))
-                    {
-                        smokes.emplace_back(smoke, tank.position - vec2(0, 48));
-                    }
-                }
-            }
-
-            //Move tanks according to speed and nudges (see above) also reload
-            tank.tick();
-
-            //Shoot at closest target if reloaded
-            if (tank.rocket_reloaded())
-            {
-                Tank& target = find_closest_enemy(tank);
-
-                rockets.emplace_back(Rocket(tank.position, (target.get_position() - tank.position).normalized() * 3, rocket_radius, tank.allignment, ((tank.allignment == RED) ? &rocket_red : &rocket_blue)));
-
-                tank.reload_rocket();
-            }
-        }
-    }
-}
 void Game::draw()
 {
     // clear the graphics window

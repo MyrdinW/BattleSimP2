@@ -1,6 +1,7 @@
 #include "precomp.h"
 #include "explosion.h"
 
+
 bool Tmpl8::Explosion::done() const
 {
     return current_frame > 17;

@@ -58,7 +58,16 @@ class Game
 
     bool lock_update = false;
 
-    void UpdateTanks();
+    void updateSmoke();
+    void updateParticlebeams();
+
+    void updateExplosions();
+
+    void updateTanks();
+
+    void updateRockets();
+
+    
 
 };
 
