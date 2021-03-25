@@ -117,7 +117,11 @@ Tank& Game::find_closest_enemy(Tank& current_tank)
 // -----------------------------------------------------------
 void Game::update(float deltaTime)
 {
-    initKD();
+    if (frame_count % 200 == 0) 
+    {
+        initKD();
+    }
+    
     updateSmoke();
     
     updateParticlebeams();

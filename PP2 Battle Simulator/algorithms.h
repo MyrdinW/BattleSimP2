@@ -71,11 +71,11 @@ namespace Tmpl8
     /**
      * The node used by the KD Tree
      */
-    class KD_node
+    class KDNode
     {
     public:
-        KD_node(Tank* tank) : tank(tank) {};
-        ~KD_node()
+        KDNode(Tank* tank) : tank(tank) {};
+        ~KDNode()
         {
             delete left;
             delete right;
@@ -89,8 +89,8 @@ namespace Tmpl8
         };
 
         Tank* tank = nullptr;
-        KD_node* right = nullptr;
-        KD_node* left = nullptr;
+        KDNode* right = nullptr;
+        KDNode* left = nullptr;
     };
     /**
      * The K-D Tree
@@ -119,13 +119,13 @@ namespace Tmpl8
         };
 
     private:
-        KD_node* root = nullptr;
-        static KD_node* BuildKDTree(std::vector<Tank*> input, unsigned depth);
+        KDNode* root = nullptr;
+        static KDNode* BuildKDTree(std::vector<Tank*> input, unsigned depth);
         static float calculateCurrentClosest(float targetXY, float hyperplaneMinXY, float hyperplaneMaxXY);
-        static Tank* searchNN(KD_node* currentNode, Tank* target, Rectangle2D& hyperplane, float distanceCurrentClosestTank, Tank* currentClosestTank, int depth);
+        static Tank* searchNN(KDNode* currentNode, Tank* target, Rectangle2D& hyperplane, float distanceCurrentClosestTank, Tank* currentClosestTank, int depth);
 
-        static void bst_print_dot(KD_node* tree, FILE* stream);
-        static void bst_print_dot_aux(KD_node* node, FILE* stream);
+        static void bst_print_dot(KDNode* tree, FILE* stream);
+        static void bst_print_dot_aux(KDNode* node, FILE* stream);
         static void bst_print_dot_null(const std::string& key, int nullCount, FILE* stream);
     };
 

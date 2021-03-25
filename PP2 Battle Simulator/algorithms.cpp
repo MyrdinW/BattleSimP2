@@ -54,11 +54,11 @@ namespace Tmpl8
     }
     // Inserts list of tanks in the tree and return the root
     // The parameter depth is used to decide axis of comparison
-    KD_node* KDTree::BuildKDTree(std::vector<Tank*> input, unsigned depth)
+    KDNode* KDTree::BuildKDTree(std::vector<Tank*> input, unsigned depth)
     {
         // Tree is empty?
         if (input.size() == 1)
-            return new KD_node(input[0]);
+            return new KDNode(input[0]);
 
         if (input.empty())
             return nullptr;
@@ -75,7 +75,7 @@ namespace Tmpl8
         vector<Tank*> left(input.begin(), input.begin() + (input.size() / 2));
         vector<Tank*> right(input.begin() + ((input.size() / 2) + 1), input.end());
 
-        KD_node* root = new KD_node(tank);
+        KDNode* root = new KDNode(tank);
         root->left = BuildKDTree(left, depth + 1);
         root->right = BuildKDTree(right, depth + 1);
 
@@ -94,7 +94,7 @@ namespace Tmpl8
         return searchNN(root, tank, hyperplane, max, nullptr, 0);
     }
 
-    Tank* KDTree::searchNN(KD_node* currentNode, Tank* target, Rectangle2D& hyperplane, float distanceCurrentClosestTank, Tank* currentClosestTank, int depth)
+    Tank* KDTree::searchNN(KDNode* currentNode, Tank* target, Rectangle2D& hyperplane, float distanceCurrentClosestTank, Tank* currentClosestTank, int depth)
     {
 #ifdef USING_EASY_PROFILER
         //EASY_BLOCK("searchNN", profiler::colors::Red);
@@ -105,7 +105,7 @@ namespace Tmpl8
         // X[0], Y[1] axis
         int axis = depth % 2;
         Rectangle2D leftOrTopHyperplane = {}, rightOrBottomHyperplane = {}, closestHyperplane = {}, furthestHyperplane = {};
-        KD_node* closestNode = nullptr, * furthestNode = nullptr;
+        KDNode* closestNode = nullptr, * furthestNode = nullptr;
 
         // X axis, divide vertical
         if (axis == 0)
@@ -182,7 +182,7 @@ namespace Tmpl8
         fprintf(stream, "    \"%s\" -> null%d;\n", key.c_str(), nullCount);
     }
 
-    void KDTree::bst_print_dot_aux(KD_node* node, FILE* stream)
+    void KDTree::bst_print_dot_aux(KDNode* node, FILE* stream)
     {
         static int nullCount = 0;
 
@@ -203,7 +203,7 @@ namespace Tmpl8
             bst_print_dot_null(node->print(), nullCount++, stream);
     }
 
-    void KDTree::bst_print_dot(KD_node* tree, FILE* stream)
+    void KDTree::bst_print_dot(KDNode* tree, FILE* stream)
     {
         fprintf(stream, "digraph BST {\n");
         fprintf(stream, "    node [fontname=\"Arial\"];\n");
