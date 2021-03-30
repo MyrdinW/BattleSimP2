@@ -8,7 +8,7 @@ using namespace std;
 using namespace Tmpl8;
 
 Grid* Grid::instance = nullptr;
-mutex mtx2;
+mutex gridlock;
 
 Grid::Grid()
 {
@@ -49,7 +49,7 @@ void Grid::AddTankToGridCell(Tank * tank) { grid[(int)tank->gridCell.x][(int)tan
 
 void Grid::MoveTankToGridCell(Tmpl8::Tank * tank, const vec2&newPos)
 {
-    //scoped_lock lock(mtx2);
+    scoped_lock lock(gridlock);
     auto& gridCell = grid[(int)tank->gridCell.x][(int)tank->gridCell.y];
     grid[(int)newPos.x][(int)newPos.y].emplace_back(tank);
     for (int i = 0; i < gridCell.size(); ++i)
