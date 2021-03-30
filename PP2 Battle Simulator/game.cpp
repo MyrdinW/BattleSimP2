@@ -28,10 +28,12 @@ static Sprite particle_beam_sprite(particle_beam_img, 3);
 const static vec2 tank_size(14, 18);
 const static vec2 rocket_size(25, 24);
 
-const static float tank_radius = 15.f; // was 8.5
+const static float tank_radius = 8.5f; // was 8.5
 const static float rocket_radius = 10.f; 
 
-
+vector<int> redHealthBars = {};
+vector<int> blueHealthBars = {};
+vector<SDL_Point> drawPoints = {};
 
 // -----------------------------------------------------------
 // Initialize the application
@@ -139,7 +141,9 @@ void Game::update(float deltaTime)
 
     updateTanks();
 
-  
+    redHealthBars = CountSort(redTanks);
+
+    blueHealthBars = CountSort(blueTanks);
 
 
 }
@@ -324,64 +328,78 @@ void Game::draw()
         explosion.draw(screen);
     }
 
+    DrawTankHP();
+
+ 
 
 
-    //Draw sorted health bars
-    for (int t = 0; t < 2; t++)
-    {
-        const int NUM_TANKS = ((t < 1) ? NUM_TANKS_BLUE : NUM_TANKS_RED);
+    //for (int i = 0; i < redHealthBars.size(); ++i) DrawTankHP(i, RED, redHealthBars[i]);
 
-        const int begin = ((t < 1) ? 0 : NUM_TANKS_BLUE);
-        std::vector<const Tank*> sorted_tanks;
-        insertion_sort_tanks_health(tanks, sorted_tanks, begin, begin + NUM_TANKS);
 
-        for (int i = 0; i < NUM_TANKS; i++)
-        {
-            int health_bar_start_x = i * (HEALTH_BAR_WIDTH + HEALTH_BAR_SPACING) + HEALTH_BARS_OFFSET_X;
-            int health_bar_start_y = (t < 1) ? 0 : (SCRHEIGHT - HEALTH_BAR_HEIGHT) - 1;
-            int health_bar_end_x = health_bar_start_x + HEALTH_BAR_WIDTH;
-            int health_bar_end_y = (t < 1) ? HEALTH_BAR_HEIGHT : SCRHEIGHT - 1;
+    //for (int i = 0; i < blueHealthBars.size(); ++i) DrawTankHP(i, BLUE, blueHealthBars[i]);
 
-            screen->bar(health_bar_start_x, health_bar_start_y, health_bar_end_x, health_bar_end_y, REDMASK);
-            screen->bar(health_bar_start_x, health_bar_start_y + (int)((double)HEALTH_BAR_HEIGHT * (1 - ((double)sorted_tanks.at(i)->health / (double)TANK_MAX_HEALTH))), health_bar_end_x, health_bar_end_y, GREENMASK);
-        }
-    }
+	
 }
 
+void Game::DrawTankHP()
+{
+
+    for (int i = 0; i < NUM_TANKS_BLUE; i++)
+    {
+        int health_bar_start_x = i * (HEALTH_BAR_WIDTH + HEALTH_BAR_SPACING) + HEALTH_BARS_OFFSET_X;
+        int health_bar_end_x = health_bar_start_x + HEALTH_BAR_WIDTH;
+        int health_bar_start_y = 0;
+        int health_bar_end_y = HEALTH_BAR_HEIGHT;
+
+        screen->bar(health_bar_start_x, health_bar_start_y, health_bar_end_x, health_bar_end_y, REDMASK);
+        screen->bar(health_bar_start_x, health_bar_start_y + (int)((double)HEALTH_BAR_HEIGHT * (1 - (blueHealthBars[i] / (double)TANK_MAX_HEALTH))), health_bar_end_x, health_bar_end_y, GREENMASK);
+    }
+
+    for (int j = 0; j < NUM_TANKS_RED; j++)
+    {
+        int health_bar_start_x = j * (HEALTH_BAR_WIDTH + HEALTH_BAR_SPACING) + HEALTH_BARS_OFFSET_X;
+        int health_bar_end_x = health_bar_start_x + HEALTH_BAR_WIDTH;
+        int health_bar_start_y = (SCRHEIGHT - HEALTH_BAR_HEIGHT) - 1;
+        int health_bar_end_y = SCRHEIGHT - 1;
+
+        screen->bar(health_bar_start_x, health_bar_start_y, health_bar_end_x, health_bar_end_y, REDMASK);
+        screen->bar(health_bar_start_x, health_bar_start_y + (int)((double)HEALTH_BAR_HEIGHT * (1 - (redHealthBars[j] / (double)TANK_MAX_HEALTH))), health_bar_end_x, health_bar_end_y, GREENMASK);
+    }
+}
 
 // -----------------------------------------------------------
 // Sort tanks by health value using insertion sort
 // -----------------------------------------------------------
-void Tmpl8::Game::insertion_sort_tanks_health(const std::vector<Tank>& original, std::vector<const Tank*>& sorted_tanks, int begin, int end)
-{
-    const int NUM_TANKS = end - begin;
-    tanks.reserve(NUM_TANKS_BLUE + NUM_TANKS_RED);
-    blueTanks.reserve(NUM_TANKS_BLUE);
-    redTanks.reserve(NUM_TANKS_RED);
-    sorted_tanks.emplace_back(&original.at(begin));
-
-    for (int i = begin + 1; i < (begin + NUM_TANKS); i++)
-    {
-        const Tank& current_tank = original.at(i);
-
-        for (int s = (int)sorted_tanks.size() - 1; s >= 0; s--)
-        {
-            const Tank* current_checking_tank = sorted_tanks.at(s);
-
-            if ((current_checking_tank->compare_health(current_tank) <= 0))
-            {
-                sorted_tanks.insert(1 + sorted_tanks.begin() + s, &current_tank);
-                break;
-            }
-
-            if (s == 0)
-            {
-                sorted_tanks.insert(sorted_tanks.begin(), &current_tank);
-                break;
-            }
-        }
-    }
-}
+//void Tmpl8::Game::insertion_sort_tanks_health(const std::vector<Tank>& original, std::vector<const Tank*>& sorted_tanks, int begin, int end)
+//{
+//    const int NUM_TANKS = end - begin;
+//    tanks.reserve(NUM_TANKS_BLUE + NUM_TANKS_RED);
+//    blueTanks.reserve(NUM_TANKS_BLUE);
+//    redTanks.reserve(NUM_TANKS_RED);
+//    sorted_tanks.emplace_back(&original.at(begin));
+//
+//    for (int i = begin + 1; i < (begin + NUM_TANKS); i++)
+//    {
+//        const Tank& current_tank = original.at(i);
+//
+//        for (int s = (int)sorted_tanks.size() - 1; s >= 0; s--)
+//        {
+//            const Tank* current_checking_tank = sorted_tanks.at(s);
+//
+//            if ((current_checking_tank->compare_health(current_tank) <= 0))
+//            {
+//                sorted_tanks.insert(1 + sorted_tanks.begin() + s, &current_tank);
+//                break;
+//            }
+//
+//            if (s == 0)
+//            {
+//                sorted_tanks.insert(sorted_tanks.begin(), &current_tank);
+//                break;
+//            }
+//        }
+//    }
+//}
 
 
 

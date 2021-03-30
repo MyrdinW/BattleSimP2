@@ -19,7 +19,7 @@ class Game
     void update(float deltaTime);
     void draw();
     void initKD();
-    //void DrawTankHP(int i, allignments al, int health);
+    void DrawTankHP();
     void tick(float deltaTime);
     void insertion_sort_tanks_health(const std::vector<Tank>& original, std::vector<const Tank*>& sorted_tanks, int begin, int end);
     void measure_performance();
@@ -48,6 +48,7 @@ class Game
 
   private:
     Surface* screen;
+    SDL_Renderer* screen2;
 
     vector<Tank> tanks;
     vector<Tank*> blueTanks;
