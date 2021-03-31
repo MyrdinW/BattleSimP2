@@ -38,7 +38,7 @@ vector<int> redHealthBars = {};
 vector<int> blueHealthBars = {};
 
 int thread_amount = thread::hardware_concurrency();
-ThreadPool thread_pool(thread::hardware_concurrency());
+ThreadPool thread_pool(thread_amount);
 mutex tankVectorLock;
 
 
@@ -195,104 +195,61 @@ void Game::updateSmoke()
 
 void Game::updateTanks()
 {
-	int max = tanks.size();
-	int thread_size = max / thread_amount;
-	int start = 0;
-	int end = start + thread_size;
-	int remaining = max % thread_amount;
-	int currently_remaining = remaining;
 
-	vector<future<void>> futures;
-
-	for (int i = 0; i < thread_amount; i++) {
-		if (currently_remaining > 0)
+	std::future<void> fut = thread_pool.enqueue([&] {
+		for (int i = 0; i < tanks.size(); i++)
 		{
-			end++;
-			currently_remaining--;
-		}
-		futures.push_back(thread_pool.enqueue([&, start, end] {
-			for (int j = start; j < end; j++)
+			Tank& tank = tanks.at(i);
+			if (!tank.active) continue;
+
+			for (const auto& cell : Grid::GetNeighbouringCells())
 			{
-				Tank& tank = tanks.at(j);
-				if (!tank.active) continue;
+				int x = tank.gridCell.x + cell.x;
+				int y = tank.gridCell.y + cell.y;
+				if (x < 0 || y < 0 || x > GRID_SIZE || y > GRID_SIZE) continue;
 
-				for (const auto& cell : Grid::GetNeighbouringCells())
+				for (auto& oTank : Grid::Instance()->grid[x][y])
 				{
-					int x = tank.gridCell.x + cell.x;
-					int y = tank.gridCell.y + cell.y;
-					if (x < 0 || y < 0 || x > GRID_SIZE || y > GRID_SIZE) continue;
+					if (&tank == oTank) continue;
 
-					for (auto& oTank : Grid::Instance()->grid[x][y])
+					vec2 dir = tank.get_position() - oTank->get_position();
+
+					float colSquaredLen =
+						(tank.get_collision_radius() * tank.get_collision_radius()) +
+						(oTank->get_collision_radius() * oTank->get_collision_radius());
+
+					if (dir.sqr_length() < colSquaredLen) tank.push(dir.normalized(), 1.f);
+				}
+			}
+
+			//Check if inside particle beam
+			for (Particle_beam& particle_beam : particle_beams)
+			{
+				if (particle_beam.rectangle.intersects_circle(tank.get_position(),
+					tank.get_collision_radius()))
+				{
+					if (tank.hit(particle_beam.damage))
 					{
-						if (&tank == oTank) continue;
-
-						vec2 dir = tank.get_position() - oTank->get_position();
-
-						float colSquaredLen =
-							(tank.get_collision_radius() * tank.get_collision_radius()) +
-							(oTank->get_collision_radius() * oTank->get_collision_radius());
-
-						if (dir.sqr_length() < colSquaredLen) tank.push(dir.normalized(), 1.f);
+						smokes.emplace_back(smoke, tank.position - vec2(0, 48));
 					}
 				}
 			}
 
+			//Move tanks according to speed and nudges (see above) also reload
+			tank.tick();
 
-			}));
+			//Shoot at closest target if reloaded
+			if (!tank.rocket_reloaded()) continue;
 
-		
-	}
-	for (int i = 0; i < tanks.size(); i++)
-	{
-		Tank& tank = tanks.at(i);
-		if (!tank.active) continue;
-
-		/*for (const auto& cell : Grid::GetNeighbouringCells())
-		{
-			int x = tank.gridCell.x + cell.x;
-			int y = tank.gridCell.y + cell.y;
-			if (x < 0 || y < 0 || x > GRID_SIZE || y > GRID_SIZE) continue;
-
-			for (auto& oTank : Grid::Instance()->grid[x][y])
-			{
-				if (&tank == oTank) continue;
-
-				vec2 dir = tank.get_position() - oTank->get_position();
-
-				float colSquaredLen =
-					(tank.get_collision_radius() * tank.get_collision_radius()) +
-					(oTank->get_collision_radius() * oTank->get_collision_radius());
-
-				if (dir.sqr_length() < colSquaredLen) tank.push(dir.normalized(), 1.f);
-			}
-		}*/
-
-		//Check if inside particle beam
-		for (Particle_beam& particle_beam : particle_beams)
-		{
-			if (particle_beam.rectangle.intersects_circle(tank.get_position(),
-				tank.get_collision_radius()))
-			{
-				if (tank.hit(particle_beam.damage))
-				{
-					smokes.emplace_back(smoke, tank.position - vec2(0, 48));
-				}
-			}
+			Tank* target = tank.allignment == RED ? blueteamKD->find_closest_enemy(&tank) : redteamKD->find_closest_enemy(&tank);
+			scoped_lock lock(tankVectorLock);
+			rockets.emplace_back(tank.position, (target->position - tank.position).normalized() * 3, rocket_radius, tank.allignment, ((tank.allignment == RED) ? &rocket_red : &rocket_blue));
+			tank.reload_rocket();
 		}
 
-		//Move tanks according to speed and nudges (see above) also reload
-		tank.tick();
+		});
 
-		//Shoot at closest target if reloaded
-		if (!tank.rocket_reloaded()) continue;
-
-		Tank* target = tank.allignment == RED ? blueteamKD->find_closest_enemy(&tank) : redteamKD->find_closest_enemy(&tank);
-		scoped_lock lock(tankVectorLock);
-		rockets.emplace_back(tank.position, (target->position - tank.position).normalized() * 3, rocket_radius, tank.allignment, ((tank.allignment == RED) ? &rocket_red : &rocket_blue));
-		tank.reload_rocket();
-	}
-
-
+	//fut.wait();
 
 }
 
