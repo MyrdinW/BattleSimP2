@@ -39,6 +39,7 @@ vector<int> blueHealthBars = {};
 
 int thread_amount = thread::hardware_concurrency();
 ThreadPool thread_pool(thread_amount);
+ThreadPool thread_pool2(thread_amount);
 mutex tankVectorLock;
 
 
@@ -136,7 +137,6 @@ void Game::update(float deltaTime)
 		initKD();
 	}
 
-
 	updateSmoke();
 
 	updateParticlebeams();
@@ -145,14 +145,11 @@ void Game::update(float deltaTime)
 	//Remove explosions with remove erase idiom
 	explosions.erase(std::remove_if(explosions.begin(), explosions.end(), [](const Explosion& explosion) { return explosion.done(); }), explosions.end());
 
-	updateRockets();
+	std::future<void> fut = thread_pool.enqueue([=] { updateRockets(); updateTanks(); });
+	//fut.wait();
+
 	//Remove exploded rockets with remove erase idiom
 	rockets.erase(std::remove_if(rockets.begin(), rockets.end(), [](const Rocket& rocket) { return !rocket.active; }), rockets.end());
-
-
-
-	updateTanks();
-
 
 	redHealthBars = CountSort(redTanks);
 
@@ -459,7 +456,9 @@ void Game::tick(float deltaTime)
 	{
 		update(deltaTime);
 	}
-	draw();
+	std::future<void> fut = thread_pool.enqueue([=] { draw(); });
+	fut.wait();
+	//draw();
 
 	measure_performance();
 
