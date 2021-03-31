@@ -21,7 +21,6 @@ namespace Tmpl8
 		void initKD();
 		void DrawTankHP();
 		void tick(float deltaTime);
-		void insertion_sort_tanks_health(const std::vector<Tank>& original, std::vector<const Tank*>& sorted_tanks, int begin, int end);
 		void measure_performance();
 
 		Tank& find_closest_enemy(Tank& current_tank);
@@ -48,8 +47,6 @@ namespace Tmpl8
 
 	private:
 		Surface* screen;
-		SDL_Renderer* screen2;
-
 		vector<Tank> tanks;
 		vector<Tank*> blueTanks;
 		vector<Tank*> redTanks;

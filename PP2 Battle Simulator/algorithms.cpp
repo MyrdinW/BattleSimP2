@@ -6,6 +6,7 @@ using namespace std;
 
 namespace Tmpl8
 {
+	//Countsort for Healthbars
 	vector<int> CountSort(const vector<Tank*>& in)
 	{
 		vector<int> counters(TANK_MAX_HEALTH + 1, 0);
@@ -108,9 +109,6 @@ namespace Tmpl8
 
 	Tank* KDTree::searchNN(KDNode* currentNode, Tank* target, Rectangle2D& hyperplane, float distanceCurrentClosestTank, Tank* currentClosestTank, int depth)
 	{
-#ifdef USING_EASY_PROFILER
-		//EASY_BLOCK("searchNN", profiler::colors::Red);
-#endif
 		if (currentNode == nullptr)
 			return currentClosestTank;
 
@@ -186,48 +184,6 @@ namespace Tmpl8
 			value = hyperplaneMaxXY;
 
 		return value;
-	}
-
-	void KDTree::bst_print_dot_null(const string& key, int nullCount, FILE* stream)
-	{
-		fprintf(stream, "    null%d [shape=point];\n", nullCount);
-		fprintf(stream, "    \"%s\" -> null%d;\n", key.c_str(), nullCount);
-	}
-
-	void KDTree::bst_print_dot_aux(KDNode* node, FILE* stream)
-	{
-		static int nullCount = 0;
-
-		if (node->left)
-		{
-			fprintf(stream, "    \"%s\" -> \"%s\";\n", node->print().c_str(), node->left->print().c_str());
-			bst_print_dot_aux(node->left, stream);
-		}
-		else
-			bst_print_dot_null(node->print(), nullCount++, stream);
-
-		if (node->right)
-		{
-			fprintf(stream, "    \"%s\" -> \"%s\";\n", node->print().c_str(), node->right->print().c_str());
-			bst_print_dot_aux(node->right, stream);
-		}
-		else
-			bst_print_dot_null(node->print(), nullCount++, stream);
-	}
-
-	void KDTree::bst_print_dot(KDNode* tree, FILE* stream)
-	{
-		fprintf(stream, "digraph BST {\n");
-		fprintf(stream, "    node [fontname=\"Arial\"];\n");
-
-		if (!tree)
-			fprintf(stream, "\n");
-		else if (!tree->right && !tree->left)
-			fprintf(stream, "    \"%s\";\n", tree->print().c_str());
-		else
-			bst_print_dot_aux(tree, stream);
-
-		fprintf(stream, "}\n");
 	}
 
 } // namespace Tmpl8

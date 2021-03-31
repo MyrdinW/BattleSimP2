@@ -111,12 +111,6 @@ namespace Tmpl8
 		 */
 		Tank* find_closest_enemy(Tank* tank);
 
-		void printTree()
-		{
-			auto pFile = fopen("./TreeDebug.dot", "w");
-			bst_print_dot(root, pFile);
-			fclose(pFile);
-		};
 
 	private:
 		KDNode* root = nullptr;
@@ -124,9 +118,6 @@ namespace Tmpl8
 		static float calculateCurrentClosest(float targetXY, float hyperplaneMinXY, float hyperplaneMaxXY);
 		static Tank* searchNN(KDNode* currentNode, Tank* target, Rectangle2D& hyperplane, float distanceCurrentClosestTank, Tank* currentClosestTank, int depth);
 
-		static void bst_print_dot(KDNode* tree, FILE* stream);
-		static void bst_print_dot_aux(KDNode* node, FILE* stream);
-		static void bst_print_dot_null(const std::string& key, int nullCount, FILE* stream);
 	};
 
 	std::vector<int> CountSort(const std::vector<Tank*>& in);

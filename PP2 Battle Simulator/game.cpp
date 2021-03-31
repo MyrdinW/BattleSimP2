@@ -1,10 +1,6 @@
 #include "precomp.h" // include (only) this in every .cpp file
 #include "defines.h"
 
-
-
-
-
 //Global performance timer
 static timer perf_timer;
 static float duration;
@@ -34,12 +30,13 @@ const static vec2 rocket_size(25, 24);
 const static float tank_radius = 8.5f; // was 8.5
 const static float rocket_radius = 10.f;
 
+//vector for healthbars per allignment
 vector<int> redHealthBars = {};
 vector<int> blueHealthBars = {};
 
+//threadpool init and mutex init
 int thread_amount = thread::hardware_concurrency();
 ThreadPool thread_pool(thread_amount);
-ThreadPool thread_pool2(thread_amount);
 mutex tankVectorLock;
 
 
@@ -82,6 +79,7 @@ void Game::init()
 	particle_beams.emplace_back(Particle_beam(vec2(80, 80), vec2(100, 50), &particle_beam_sprite, PARTICLE_BEAM_HIT_VALUE));
 	particle_beams.emplace_back(Particle_beam(vec2(1200, 600), vec2(100, 50), &particle_beam_sprite, PARTICLE_BEAM_HIT_VALUE));
 
+	//add tanks to grid
 	for (auto& tank : tanks)
 	{
 		instance->AddTankToGridCell(&tank);
@@ -132,6 +130,7 @@ Tank& Game::find_closest_enemy(Tank& current_tank)
 // -----------------------------------------------------------
 void Game::update(float deltaTime)
 {
+
 	if (frame_count % 200 == 0)
 	{
 		initKD();
@@ -142,22 +141,26 @@ void Game::update(float deltaTime)
 	updateParticlebeams();
 
 	updateExplosions();
+
 	//Remove explosions with remove erase idiom
 	explosions.erase(std::remove_if(explosions.begin(), explosions.end(), [](const Explosion& explosion) { return explosion.done(); }), explosions.end());
 
+	//update multithreaded Rockets and Tanks
 	std::future<void> fut = thread_pool.enqueue([=] { updateRockets(); updateTanks(); });
-	//fut.wait();
 
 	//Remove exploded rockets with remove erase idiom
 	rockets.erase(std::remove_if(rockets.begin(), rockets.end(), [](const Rocket& rocket) { return !rocket.active; }), rockets.end());
 
+	//Sort healthbars for Red Tanks with Countsort
 	redHealthBars = CountSort(redTanks);
 
+	//Sort healthbars for Blue Tanks with Countsort
 	blueHealthBars = CountSort(blueTanks);
 
 
 }
 
+//init K-D Tree per team
 void Game::initKD()
 {
 	redteamKD = new KDTree(redTanks);
@@ -195,11 +198,16 @@ void Game::updateSmoke()
 
 void Game::updateTanks()
 {
-
+	//number of tanks per thread
 	int tanksperthread = tanks.size() / thread_amount;
-	int remain = tanks.size();
+
+	//init of counter
 	int start = 0;
+
+	//init of end counter
 	int end = start + tanksperthread;
+
+	//if any tanks not part of the division, add them in the last thread
 	int remaining = tanks.size() % thread_amount;
 	int currently_remaining = remaining;
 
@@ -208,7 +216,7 @@ void Game::updateTanks()
 
 	for (int j = 1; j < thread_amount; j++)
 	{
-		//als er tanks overblijven na het delen.
+		//if any tanks not part of the division, add them in the last thread
 		if (currently_remaining > 0)
 		{
 			end++;
@@ -265,8 +273,10 @@ void Game::updateTanks()
 
 			});
 
+		//update start counter to end counter
 		start = end;
 
+		//check if any tanks can be added to the last thread
 		if (end / j != tanksperthread) {
 			end += tanksperthread + currently_remaining;
 		}
@@ -277,9 +287,7 @@ void Game::updateTanks()
 
 	}
 
-
-
-
+	//for speedup tick is apart from the above threadpool
 	for (int k = 0; k < tanks.size(); k++)
 	{
 		Tank& tank = tanks.at(k);
@@ -306,6 +314,7 @@ void Game::updateRockets()
 			continue;
 		}
 
+		//rockets following the grid aswell
 		for (const auto& cell : Grid::GetNeighbouringCells())
 		{
 			vec2 rocketGridCell = Grid::GetGridCell(nRocket.position);
@@ -332,9 +341,6 @@ void Game::updateRockets()
 			}
 		}
 	}
-
-
-
 }
 
 void Game::updateExplosions()
@@ -348,6 +354,7 @@ void Game::updateExplosions()
 
 void Game::draw()
 {
+
 	// clear the graphics window
 	screen->clear(0);
 
@@ -357,10 +364,11 @@ void Game::draw()
 	//Draw sprites
 	for (int i = 0; i < NUM_TANKS_BLUE + NUM_TANKS_RED; i++)
 	{
+
 		tanks.at(i).draw(screen);
 
 		vec2 tank_pos = tanks.at(i).get_position();
-		// tread marks
+
 		if ((tank_pos.x >= 0) && (tank_pos.x < SCRWIDTH) && (tank_pos.y >= 0) && (tank_pos.y < SCRHEIGHT))
 			background.get_buffer()[(int)tank_pos.x + (int)tank_pos.y * SCRWIDTH] = sub_blend(background.get_buffer()[(int)tank_pos.x + (int)tank_pos.y * SCRWIDTH], 0x808080);
 	}
@@ -391,7 +399,7 @@ void Game::draw()
 
 void Game::DrawTankHP()
 {
-
+	//draw healthbars of blue tanks to screen
 	for (int i = 0; i < NUM_TANKS_BLUE; i++)
 	{
 		int health_bar_start_x = i * (HEALTH_BAR_WIDTH + HEALTH_BAR_SPACING) + HEALTH_BARS_OFFSET_X;
@@ -403,6 +411,7 @@ void Game::DrawTankHP()
 		screen->bar(health_bar_start_x, health_bar_start_y + (int)((double)HEALTH_BAR_HEIGHT * (1 - (blueHealthBars[i] / (double)TANK_MAX_HEALTH))), health_bar_end_x, health_bar_end_y, GREENMASK);
 	}
 
+	//draw healthbars of red tanks to screen
 	for (int j = 0; j < NUM_TANKS_RED; j++)
 	{
 		int health_bar_start_x = j * (HEALTH_BAR_WIDTH + HEALTH_BAR_SPACING) + HEALTH_BARS_OFFSET_X;
@@ -458,15 +467,8 @@ void Game::tick(float deltaTime)
 	}
 	std::future<void> fut = thread_pool.enqueue([=] { draw(); });
 	fut.wait();
-	//draw();
 
 	measure_performance();
-
-	// print something in the graphics window
-	//screen->Print("hello world", 2, 2, 0xffffff);
-
-	// print something to the text window
-	//cout << "This goes to the console window." << std::endl;
 
 	//Print frame count
 	frame_count++;

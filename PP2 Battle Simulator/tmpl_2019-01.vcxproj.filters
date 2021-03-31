@@ -44,6 +44,6 @@
     <Text Include="_readme.txt">
       <Filter>template code</Filter>
     </Text>
-    <Text Include="CMakeLists.txt" />
+    <Text Include="CMakeListsxx.txt" />
   </ItemGroup>
 </Project>

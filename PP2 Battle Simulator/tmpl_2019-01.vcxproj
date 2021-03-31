@@ -148,7 +148,7 @@
     <ClInclude Include="thread_pool.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="CMakeLists.txt" />
+    <Text Include="CMakeListsxx.txt" />
     <Text Include="_readme.txt" />
   </ItemGroup>
   <ItemGroup>
